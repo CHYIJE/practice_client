@@ -46,9 +46,6 @@ public class MultiClient {
 						} else {
 							out.println("MSG:" + userMessage);
 						}
-//						} else if (userMessage.equalsIgnoreCase("MSG")) {
-//							out.println("MSG:" + userMessage);
-//						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
