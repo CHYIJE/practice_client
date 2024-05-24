@@ -32,11 +32,11 @@ public class MultiThreadClient {
 	
 
 	// 1. 클라이언트로부터 데이터를 읽는 스레드 시작 메서드 생성
-	private static void StartReadThread(BufferedReader Reader) {
+	private static void StartReadThread(BufferedReader reader) {
 		Thread readThread = new Thread(() -> {
 			try {
 				String msg;
-				while ((msg = Reader.readLine()) != null) {
+				while ((msg = reader.readLine()) != null) {
 					System.out.println("server에서 온 MSG. " + msg);
 				}
 			} catch (Exception e) {

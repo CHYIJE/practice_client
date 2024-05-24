@@ -7,14 +7,15 @@ import java.net.Socket;
 public class MyClient extends AbstractClient {
 
 	@Override
-	protected void connection() throws IOException {
-		super.setSocket(new Socket("localhost", 5000));
-		System.out.println("port 5000 connect!");
+	protected void connectToServer() throws IOException {
+		setSocket(new Socket("localhost", 5000));
+		System.out.println("*** Connected to the server ***");
 	}
 
 	public static void main(String[] args) {
-		MyClient myThreadClient = new MyClient();
-		myThreadClient.run();
-		
+		System.out.println("#### 클라이언트 실행 ####");
+		MyClient client = new MyClient();
+		client.run();
+
 	}
 }

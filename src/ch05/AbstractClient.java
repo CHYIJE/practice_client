@@ -10,62 +10,51 @@ import java.net.Socket;
 public abstract class AbstractClient {
 
 	private Socket socket;
-	private BufferedReader bufferedReader;
-	private PrintWriter printWriter;
+	private BufferedReader readerStream;
+	private PrintWriter writerStream;
 	private BufferedReader keyboardReader;
-
-	protected void setSocket(Socket socket) {
-		this.socket = socket;
-	}
 
 	public final void run() {
 		try {
-			connection();
+			connectToServer();
 			setupStream();
-			startService();
+			startCommunication();
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
+		} finally {
+			cleanup();
 		}
-
 	}
-	
-	// 2. 클라이언트 연결 대기 실행 (구현 클래스)
-	protected abstract void connection() throws IOException;
-	
-	// 3. 스트림 초기화 (연결된 소켓에서 스트림을 뽑아야 함) - 여기서 함
+
+	protected abstract void connectToServer() throws IOException;
+
 	private void setupStream() throws IOException {
-		bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		printWriter = new PrintWriter(socket.getOutputStream(), true);
+		readerStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		writerStream = new PrintWriter(socket.getOutputStream(), true);
 		keyboardReader = new BufferedReader(new InputStreamReader(System.in));
 	}
 
-	// 4. 서비스 시작
-	private void startService() {
-		// while <--
+	private void startCommunication() throws InterruptedException {
 		Thread readThread = createReadThread();
-		// while -->
-		Thread wrThread = createWriteThread();
+		Thread writeThread = createWriteThread();
 
 		readThread.start();
-		wrThread.start();
-		
-		
+		writeThread.start();
+
+		readThread.join();
+		writeThread.join();
 	}
 
 	// 캡슐화
 	private Thread createReadThread() {
 		return new Thread(() -> {
 			try {
-				String msg;
-				//
-				while ((msg = bufferedReader.readLine()) != null) {
-					// 서버측 콘솔에 출력
-					System.out.println("server 측 msg : " + msg);
-
+				String serverMessage;
+				while ((serverMessage = readerStream.readLine()) != null) {
+					System.out.println("서버에서 온 msg: " + serverMessage);
 				}
-			} catch (Exception e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
@@ -74,28 +63,27 @@ public abstract class AbstractClient {
 	private Thread createWriteThread() {
 		return new Thread(() -> {
 			try {
-				String msg;
-				while ((msg = keyboardReader.readLine()) != null) {
-				
-				printWriter.println(msg);
-				printWriter.flush();
+				String clientMessage;
+				while ((clientMessage = keyboardReader.readLine()) != null) {
+					writerStream.println(clientMessage);
 				}
-			} catch (Exception e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
 	}
 
+	protected void setSocket(Socket socket) {
+		this.socket = socket;
+	}
 
-	// 캡슐화 - 소켓 자원 종료
 	private void cleanup() {
 		try {
 			if (socket != null) {
 				socket.close();
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 }

@@ -17,17 +17,12 @@ public abstract class AbstractClient {
 		this.name = name;
 	}
 
-	// 외부에서 나의 멤버 변수에 참조변수를 주입 다을 수 있도록 setter 메서드 설계
-	protected void setSocket(Socket socket) {
-		this.socket = socket;
-	}
-
 	// 실행의 흐름
 	public final void run() {
 		try {
 			connectToServer();
 			setupStreams();
-			startService();
+			startService(); // join() 걸어둔 상태
 		} catch (IOException e) {
 			System.out.println(">>> 접속 종료 <<<");
 		} finally {
